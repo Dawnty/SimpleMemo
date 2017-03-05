@@ -18,7 +18,12 @@ class MemoViewController: UIViewController {
 
   fileprivate let textView = UITextView()
   fileprivate var sharedItem: UIBarButtonItem!
-  fileprivate var isTextChanged = false
+
+  convenience init(text: String? = nil) {
+    self.init(nibName: nil, bundle: nil)
+    textView.text = text ?? ""
+    saveCurrentText()
+  }
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -63,11 +68,11 @@ private extension MemoViewController {
     if memo == nil {
       title = "新便签"
       textView.becomeFirstResponder()
-      sharedItem.isEnabled = false
     } else {
       title = memo!.text?.fetchTitle()
       textView.text = memo!.text
     }
+    sharedItem.isEnabled = !textView.text.isEmpty
   }
 
   func setTextView() {
@@ -116,6 +121,13 @@ private extension MemoViewController {
     setTextViewConstraints(withBottomOffset: -(view.bounds.size.height - keyboardY + 5))
   }
 
+  func saveCurrentText() {
+    memo = memo ?? Memo.newMemo()
+    memo!.text = textView.text
+    memo!.updateDate = Date()
+    CoreDataStack.default.saveContext()
+  }
+
 }
 
 // MARK: - UITextViewDelegate
@@ -123,13 +135,9 @@ private extension MemoViewController {
 extension MemoViewController: UITextViewDelegate {
 
   func textViewDidChange(_ textView: UITextView) {
-    isTextChanged = true
     memo?.isUpload = false
     sharedItem.isEnabled = !textView.text.isEmpty
-    memo = memo ?? Memo.newMemo()
-    memo!.text = textView.text
-    memo!.updateDate = Date()
-    CoreDataStack.default.saveContext()
+    saveCurrentText()
   }
 
 }
