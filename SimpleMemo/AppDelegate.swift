@@ -11,6 +11,11 @@ import CoreData
 import EvernoteSDK
 import SMKit
 
+enum ShortcutItemType: String {
+  case newMemo = "com.likumb.Memo.newMemo"
+  case paste = "com.likumb.Memo.paste"
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -51,11 +56,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
     var handle = false
-    if let _ = shortcutItem.localizedTitle as String? {
-      handle = true
-      let memoVC =  MemoViewController()
-      navigationController?.pushViewController(memoVC, animated: true)
+    guard let shortcutItemType = ShortcutItemType(rawValue: shortcutItem.type) else {
+      completionHandler(handle)
+      return
     }
+    handle = true
+    var text: String? = nil
+    switch shortcutItemType {
+    case .newMemo:
+      break
+    case .paste:
+      text = UIPasteboard.general.string
+    }
+    let memoVC =  MemoViewController(text: text)
+    navigationController?.pushViewController(memoVC, animated: true)
     completionHandler(handle)
   }
 
