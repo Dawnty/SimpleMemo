@@ -14,13 +14,7 @@ class CoreDataStack {
   static let `default` = CoreDataStack()
 
   lazy var persistentContainer: NSPersistentContainer = {
-    let container = NSPersistentContainer(name: "SimpleMemo")
-    container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-      if let error = error as NSError? {
-        fatalError("Unresolved error \(error), \(error.userInfo)")
-      }
-    })
-    return container
+    return self.fetchPersistentContainer(with: "SimpleMemo")
   }()
 
   lazy var managedContext: NSManagedObjectContext = {
@@ -38,4 +32,29 @@ class CoreDataStack {
     }
   }
 
+  func fetchPersistentContainer(with name: String) -> NSPersistentContainer {
+    let container = NSPersistentContainer(name: name)
+    container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+      if let error = error as NSError? {
+        fatalError("Unresolved error \(error), \(error.userInfo)")
+      }
+    })
+    return container
+  }
+
+}
+
+extension CoreDataStack {
+
+  func fetchOldMemos() -> [Memo] {
+    var memos = [Memo]()
+    let container = fetchPersistentContainer(with: "Memo")
+    let memoFetch = Memo.defaultRequest()
+    do {
+      memos = try container.viewContext.fetch(memoFetch)
+    } catch let error as NSError {
+      printLog(message: "\(error.userInfo)")
+    }
+    return memos
+  }
 }
