@@ -23,7 +23,7 @@
 		F4351DD11E62CC62001FE8A9 /* DefaultMemos.plist in Resources */ = {isa = PBXBuildFile; fileRef = F4351DC91E62CC62001FE8A9 /* DefaultMemos.plist */; };
 		F4351DD31E62CC62001FE8A9 /* SimpleMemo.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F4351DCB1E62CC62001FE8A9 /* SimpleMemo.xcdatamodeld */; };
 		F4351DD41E62CC62001FE8A9 /* LaunchScreen.strings in Resources */ = {isa = PBXBuildFile; fileRef = F4351DCD1E62CC62001FE8A9 /* LaunchScreen.strings */; };
-		F44725F31E6D994600B674D5 /* Memo.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F44725F11E6D994600B674D5 /* Memo.xcdatamodeld */; };
+		F44725F51E6E1F3200B674D5 /* OldCoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44725F41E6E1F3200B674D5 /* OldCoreDataStack.swift */; };
 		F49D67121E645A8E0014E284 /* SMNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49D67111E645A8E0014E284 /* SMNotification.swift */; };
 		F4A0414E1E618CA00012EAEF /* PrintLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A0414D1E618CA00012EAEF /* PrintLog.swift */; };
 		F4A041501E618F910012EAEF /* MemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A0414F1E618F910012EAEF /* MemoViewController.swift */; };
@@ -92,7 +92,7 @@
 		F4351DCA1E62CC62001FE8A9 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F4351DCC1E62CC62001FE8A9 /* SimpleMemo.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SimpleMemo.xcdatamodel; sourceTree = "<group>"; };
 		F4351DCE1E62CC62001FE8A9 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
-		F44725F21E6D994600B674D5 /* Memo.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Memo.xcdatamodel; sourceTree = "<group>"; };
+		F44725F41E6E1F3200B674D5 /* OldCoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OldCoreDataStack.swift; sourceTree = "<group>"; };
 		F49D67111E645A8E0014E284 /* SMNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMNotification.swift; sourceTree = "<group>"; };
 		F4A0414D1E618CA00012EAEF /* PrintLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrintLog.swift; sourceTree = "<group>"; };
 		F4A0414F1E618F910012EAEF /* MemoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoViewController.swift; sourceTree = "<group>"; };
@@ -192,7 +192,6 @@
 				F4351DC91E62CC62001FE8A9 /* DefaultMemos.plist */,
 				F4351DCA1E62CC62001FE8A9 /* Info.plist */,
 				F4351DCB1E62CC62001FE8A9 /* SimpleMemo.xcdatamodeld */,
-				F44725F11E6D994600B674D5 /* Memo.xcdatamodeld */,
 				F4351DCD1E62CC62001FE8A9 /* LaunchScreen.strings */,
 			);
 			path = Resource;
@@ -277,6 +276,7 @@
 			children = (
 				F4BBE9941E6182C400638C21 /* Memo.swift */,
 				F4BBE9891E6164D100638C21 /* CoreDataStack.swift */,
+				F44725F41E6E1F3200B674D5 /* OldCoreDataStack.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -563,12 +563,12 @@
 				F4A041501E618F910012EAEF /* MemoViewController.swift in Sources */,
 				F4BBE9791E61531C00638C21 /* MemoListViewController.swift in Sources */,
 				F4351DD31E62CC62001FE8A9 /* SimpleMemo.xcdatamodeld in Sources */,
+				F44725F51E6E1F3200B674D5 /* OldCoreDataStack.swift in Sources */,
 				F4BBE9961E6182C400638C21 /* Memo.swift in Sources */,
 				F4BBE9901E616E2700638C21 /* MemoLabel.swift in Sources */,
 				F4BBE9781E61531C00638C21 /* MemoCollectionViewController.swift in Sources */,
 				F4351DA81E627942001FE8A9 /* EvernoteKey.swift in Sources */,
 				F4BBE94D1E613F3900638C21 /* AppDelegate.swift in Sources */,
-				F44725F31E6D994600B674D5 /* Memo.xcdatamodeld in Sources */,
 				F4A041531E61A3020012EAEF /* String+FetchTitle.swift in Sources */,
 				F4BBE98E1E616DDD00638C21 /* MemoCell.swift in Sources */,
 			);
@@ -870,16 +870,6 @@
 			);
 			currentVersion = F4351DCC1E62CC62001FE8A9 /* SimpleMemo.xcdatamodel */;
 			path = SimpleMemo.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-		F44725F11E6D994600B674D5 /* Memo.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				F44725F21E6D994600B674D5 /* Memo.xcdatamodel */,
-			);
-			currentVersion = F44725F21E6D994600B674D5 /* Memo.xcdatamodel */;
-			path = Memo.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};

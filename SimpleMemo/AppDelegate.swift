@@ -104,7 +104,7 @@ private extension AppDelegate {
     let oldMemos = UserDefaults.standard.object(forKey: "OldMemos") as? String
     if oldMemos != nil { return }
 
-    let memos = CoreDataStack.default.fetchOldMemos()
+    let memos = OldCoreDataStack.sharded.fetchOldMemos()
     for memo in memos {
       let newMemo = Memo.newMemo()
       newMemo.createDate = memo.changeDate
