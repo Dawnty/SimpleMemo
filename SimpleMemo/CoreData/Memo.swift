@@ -18,6 +18,7 @@ public class Memo: NSManagedObject {
   @NSManaged public var isUpload: Bool
   @NSManaged public var createDate: Date?
   @NSManaged public var updateDate: Date?
+  @NSManaged public var changeDate: Date?
 
 }
 

@@ -32,6 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     window?.makeKeyAndVisible()
 
     loadDefaultMemos()
+    loadOldMemos()
 
     // Need a `EvernoteKey.swift` file, and init `evernoteKey` and `evernoteSecret`.
     ENSession.setSharedSessionConsumerKey(evernoteKey, consumerSecret: evernoteSecret, optionalHost: nil)
@@ -99,4 +100,21 @@ private extension AppDelegate {
     }
   }
 
+  func loadOldMemos() {
+    let oldMemos = UserDefaults.standard.object(forKey: "OldMemos") as? String
+    if oldMemos != nil { return }
+
+    let memos = CoreDataStack.default.fetchOldMemos()
+    for memo in memos {
+      let newMemo = Memo.newMemo()
+      newMemo.createDate = memo.changeDate
+      newMemo.updateDate = Date()
+      newMemo.isUpload = memo.isUpload
+      newMemo.text = memo.text
+      newMemo.noteRef = memo.noteRef
+    }
+
+    CoreDataStack.default.saveContext()
+    UserDefaults.standard.set("OldMemos", forKey: "OldMemos")
+  }
 }
