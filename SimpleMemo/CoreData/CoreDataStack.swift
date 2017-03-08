@@ -43,18 +43,3 @@ class CoreDataStack {
   }
 
 }
-
-extension CoreDataStack {
-
-  func fetchOldMemos() -> [Memo] {
-    var memos = [Memo]()
-    let container = fetchPersistentContainer(with: "Memo")
-    let memoFetch = Memo.defaultRequest()
-    do {
-      memos = try container.viewContext.fetch(memoFetch)
-    } catch let error as NSError {
-      printLog(message: "\(error.userInfo)")
-    }
-    return memos
-  }
-}
