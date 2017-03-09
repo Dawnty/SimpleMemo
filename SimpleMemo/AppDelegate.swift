@@ -36,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Need a `EvernoteKey.swift` file, and init `evernoteKey` and `evernoteSecret`.
     ENSession.setSharedSessionConsumerKey(evernoteKey, consumerSecret: evernoteSecret, optionalHost: nil)
+    ENSession.shared.fetchSimpleMemoNoteBook()
 
     UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: SMColor.title]
 
