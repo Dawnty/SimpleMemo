@@ -27,12 +27,6 @@ public class SMStoreClient {
   }
 
   public static func saveSimpleMemoNoteBook<T: NSCoding>(book: T) {
-//    let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
-//    let pathStr: NSString = path as NSString
-//    let filePath = pathStr.appendingPathComponent(Keys.SimpleMemoNoteBookPath)
-//    let archiver = NSKeyedArchiver(forWritingWith: NSMutableData())
-//    archiver.encode(book, forKey: Keys.SimpleMemoNoteBookPath)
-//    archiver.finishEncoding()
     let data = NSKeyedArchiver.archivedData(withRootObject: book)
     shared.set(data, forKey: Keys.SimpleMemoNoteBookPath)
   }
