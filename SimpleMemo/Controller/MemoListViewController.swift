@@ -296,6 +296,9 @@ extension MemoListViewController: UIViewControllerPreviewingDelegate {
 private extension MemoListViewController {
 
   func uploadMemoToEvernote() {
+    if !ENSession.shared.isAuthenticated || SimpleMemoNoteBook == nil {
+      return
+    }
     // 取出所有没有上传的memo
     let predicate = NSPredicate(format: "isUpload == %@", false as CVarArg)
     let request = Memo.defaultRequest()

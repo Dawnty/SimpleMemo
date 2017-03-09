@@ -8,58 +8,29 @@
 
 import Foundation
 import EvernoteSDK
+import SMKit
+
+var SimpleMemoNoteBook: ENNotebook?
+private let bookName = "易便签"
 
 extension ENSession {
 
-  func fetchOrCreateSimpleMemoNoteBook() -> EDAMNotebook? {
-    if !self.isAuthenticated { return nil }
-    guard let client = self.primaryNoteStore() else { return nil }
-
-    if let bookGuid: String = UserDefaults.standard.object(forKey: "SimpleMemoNoteBook") as? String {
-      client.fetchNotebook(withGuid: bookGuid, completion: { (book, error) in
-        if let book = book {
-          printLog(message: "\(book)")
-        } else if let error = error {
-          printLog(message: error.localizedDescription)
-        }
-      })
+  func fetchSimpleMemoNoteBook() {
+    if !self.isAuthenticated { return }
+    if let book: ENNotebook = SMStoreClient.fetchSimpleMemoNoteBook() as? ENNotebook {
+      SimpleMemoNoteBook = book
+      return
     }
-
-    let noteBook = EDAMNotebook()
-    noteBook.name = "易便签"
-    client.create(noteBook) { (book, error) in
-      if let book = book {
-        printLog(message: book.name)
-      }
-
-      if let error = error {
-        printLog(message: error.localizedDescription)
-        self.fetchSimpleMemoNoteBook()
-      }
+    if let guid = SMStoreClient.getSimpleMemoNoteBookGuid() {
+      fetchSimpleMemoNoteBook(with: guid)
+    } else {
+      createSimpleMemoNoteBook()
     }
-
-    return nil
-  }
-
-  func fetchSimpleMemoNoteBook() -> EDAMNotebook? {
-    guard let client = self.primaryNoteStore() else { return nil }
-    client.listNotebooks { (books, error) in
-      if let books = books {
-        for book in books {
-          if book.name == "易便签" {
-            UserDefaults.standard.set(book.guid, forKey: "SimpleMemoNoteBook")
-            printLog(message: "\(book)")
-            break
-          }
-        }
-      }
-    }
-    return nil
   }
 
   /// 上传便签到印象笔记
   func uploadMemoToEvernote(_ memo: Memo) {
-    if self.isAuthenticated == false {
+    guard let book = SimpleMemoNoteBook, self.isAuthenticated == true else {
       return
     }
     guard let text = memo.text, text.characters.count > 0 else {
@@ -71,7 +42,7 @@ extension ENSession {
     note.content = ENNoteContent(string: text)
 
     if memo.noteRef == nil {
-      self.upload(note, notebook: nil, completion: { (noteRef, error) -> Void in
+      self.upload(note, notebook: book, completion: { (noteRef, error) -> Void in
         if noteRef != nil {
           memo.noteRef = noteRef
           memo.isUpload = true
@@ -79,7 +50,7 @@ extension ENSession {
         }
       })
     } else {
-      self.upload(note, policy: .replaceOrCreate, to: nil, orReplace: memo.noteRef, progress: nil, completion: { (noteRef, error) -> Void in
+      self.upload(note, policy: .replaceOrCreate, to: book, orReplace: memo.noteRef, progress: nil, completion: { (noteRef, error) -> Void in
         if noteRef != nil {
           memo.noteRef = noteRef
           memo.isUpload = true
@@ -100,6 +71,59 @@ extension ENSession {
         printLog(message: error.debugDescription)
       }
     })
+  }
+
+}
+
+private extension ENSession {
+
+  func fetchSimpleMemoNoteBook(with guid: String) {
+    guard let client = self.primaryNoteStore() else { return }
+    client.fetchNotebook(withGuid: guid, completion: { (book, error) in
+      if let book = book {
+        SimpleMemoNoteBook = ENNotebook(notebook: book)
+        SMStoreClient.saveSimpleMemoNoteBook(book: book)
+        printLog(message: "\(book)")
+      } else if let error = error {
+        printLog(message: error.localizedDescription)
+      }
+    })
+  }
+
+  func createSimpleMemoNoteBook() {
+    guard let client = self.primaryNoteStore() else { return }
+    let noteBook = EDAMNotebook()
+    noteBook.name = bookName
+    client.create(noteBook) { (book, error) in
+      if let book = book {
+        SimpleMemoNoteBook = ENNotebook(notebook: book)
+        SMStoreClient.saveSimpleMemoNoteBook(book: book)
+        SMStoreClient.saveSimpleMemoNoteBookGuid(with: book.guid)
+        printLog(message: book.name)
+      } else if let error = error {
+        printLog(message: error.localizedDescription)
+        self.findSimpleMemoNoteBook()
+      }
+    }
+  }
+
+  func findSimpleMemoNoteBook() {
+    guard let client = self.primaryNoteStore() else { return }
+    client.listNotebooks { (books, error) in
+      if let books = books {
+        for book in books {
+          if book.name == bookName {
+            SimpleMemoNoteBook = ENNotebook(notebook: book)
+            SMStoreClient.saveSimpleMemoNoteBook(book: book)
+            SMStoreClient.saveSimpleMemoNoteBookGuid(with: book.guid)
+            printLog(message: "\(book)")
+            break
+          }
+        }
+      } else if let error = error {
+        printLog(message: error.localizedDescription)
+      }
+    }
   }
 
 }
