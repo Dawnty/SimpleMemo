@@ -11,4 +11,5 @@ import Foundation
 public struct SMNotification {
   public static let MemoCellShouldHiddenDeleteBtn = NSNotification.Name("MemoCellShouldHiddenDeleteBtn")
   public static let MemoCellDidShowDeleteBtn = NSNotification.Name("MemoCellDidShowDeleteBtn")
+  public static let SimpleMemoDidSetSimpleMemoNotebook = NSNotification.Name("SimpleMemoDidSetSimpleMemoNotebook")
 }

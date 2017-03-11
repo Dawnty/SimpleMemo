@@ -84,6 +84,12 @@ class MemoListViewController: MemoCollectionViewController {
     if traitCollection.forceTouchCapability == .available {
       registerForPreviewing(with: self, sourceView: view)
     }
+
+    if SimpleMemoNoteBook != nil {
+      updateMemoFromEvernote()
+    }
+
+    NotificationCenter.default.addObserver(self, selector: #selector(updateMemoFromEvernote), name: SMNotification.SimpleMemoDidSetSimpleMemoNotebook, object: nil)
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -91,6 +97,10 @@ class MemoListViewController: MemoCollectionViewController {
     if ENSession.shared.isAuthenticated {
       uploadMemoToEvernote()
     }
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
   }
 
 }
@@ -153,6 +163,7 @@ private extension MemoListViewController {
     } else {
       ENSession.shared.authenticate(with: self, preferRegistration: false, completion: { error in
         if error == nil {
+          ENSession.shared.fetchSimpleMemoNoteBook()
           self.evernoteItem.tintColor = SMColor.tint
         } else {
           printLog(message: error.debugDescription)
@@ -313,6 +324,63 @@ private extension MemoListViewController {
     if let unUploadMemos = results as? [Memo] {
       for unUploadMemo in unUploadMemos {
         ENSession.shared.uploadMemoToEvernote(unUploadMemo)
+      }
+    }
+  }
+
+  @objc func updateMemoFromEvernote() {
+    if !ENSession.shared.isAuthenticated || SimpleMemoNoteBook == nil {
+      return
+    }
+
+    ENSession.shared.downloadNotesInSimpleMemoNotebook { [weak self] (results, error) in
+      if let results = results {
+        self?.updateMemos(with: results)
+      } else if let error = error {
+        printLog(message: error.localizedDescription)
+      }
+    }
+  }
+
+  func updateMemos(with results: [ENSessionFindNotesResult]) {
+    guard let currentMemos = fetchedResultsController.fetchedObjects else {
+      return
+    }
+    var tempMemos = currentMemos
+    let currentGuid = tempMemos.flatMap { $0.guid ?? $0.noteRef?.guid }
+    let resultsGuids = results.map { $0.noteRef?.guid }
+    for (index, guid) in resultsGuids.enumerated() {
+      guard let guid = guid else { continue }
+      let result = results[index]
+      if !currentGuid.contains(guid) {
+        ENSession.shared.downloadNewMemo(with: result.noteRef!, created: result.created, updated: result.updated)
+        continue
+      }
+
+      var currentMemo: Memo?
+      for (index, memo) in tempMemos.enumerated() {
+        let memoGuid = memo.guid ?? memo.noteRef?.guid
+        if memoGuid == guid {
+          currentMemo = memo
+          tempMemos.remove(at: index)
+          break
+        }
+      }
+      guard let memo = currentMemo else {
+        ENSession.shared.downloadNewMemo(with: result.noteRef!, created: result.created, updated: result.updated)
+        continue
+      }
+
+      if !memo.isUpload {
+        memo.guid = nil
+        memo.noteRef = nil
+        CoreDataStack.default.saveContext()
+        ENSession.shared.downloadNewMemo(with: result.noteRef!, created: result.created, updated: result.updated)
+        continue
+      }
+
+      if memo.updateDate != result.created {
+        ENSession.shared.update(memo, noteRef: result.noteRef!, created: result.created, updated: result.updated)
       }
     }
   }

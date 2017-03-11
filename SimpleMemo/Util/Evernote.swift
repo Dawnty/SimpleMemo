@@ -12,7 +12,7 @@ import SMKit
 
 var SimpleMemoNoteBook: ENNotebook? {
   didSet {
-    ENSession.shared.downloadNotesInSimpleMemoNotebook(with: nil)
+    NotificationCenter.default.post(name: SMNotification.SimpleMemoDidSetSimpleMemoNotebook, object: nil)
   }
 }
 
@@ -33,12 +33,39 @@ extension ENSession {
     }
   }
 
-  func downloadNotesInSimpleMemoNotebook(with compeletion: ((_ notesResults: [ENSessionFindNotesResult]?, _ error: NSError?) -> Void)?) {
+  func downloadNotesInSimpleMemoNotebook(with compeletion: ((_ notesResults: [ENSessionFindNotesResult]?, _ error: Error?) -> Void)?) {
     findNotes(with: nil, in: SimpleMemoNoteBook, orScope: .personal, sortOrder: .recentlyUpdated, maxResults: 0) { (results, error) in
-      if let results = results {
-        for result in results {
-          printLog(message: "\(result)")
-        }
+      compeletion?(results, error)
+    }
+  }
+
+  func update(_ memo: Memo, noteRef: ENNoteRef, created: Date?, updated: Date?) {
+    download(noteRef, progress: nil) { (note, error) in
+      if let note = note {
+        memo.noteRef = noteRef
+        memo.guid = noteRef.guid
+        memo.isUpload = true
+        let enmlContent = note.enmlContent()
+        memo.text = enmlContent?.stringFromHTML
+        memo.createDate = created
+        memo.updateDate = updated
+        CoreDataStack.default.saveContext()
+      }
+    }
+
+  }
+
+  func downloadNewMemo(with noteRef: ENNoteRef, created: Date?, updated: Date?) {
+    download(noteRef, progress: nil) { (note, error) in
+      if let note = note {
+        let memo = Memo.newMemo()
+        memo.noteRef = noteRef
+        memo.isUpload = true
+        let enmlContent = note.enmlContent()
+        memo.text = enmlContent?.stringFromHTML
+        memo.createDate = created
+        memo.updateDate = updated
+        CoreDataStack.default.saveContext()
       }
     }
   }
@@ -61,6 +88,7 @@ extension ENSession {
 
     if let guid = guid {
       amnote.guid = guid
+      // 这里如果笔记在印象笔记里已经被移入废纸篓，依然能更新成功，但只能在废纸篓中看到，同时返回的note.deleted是有值的。
       storeClient.update(amnote, completion: { [weak self] (note, error) in
         if let note = note {
           self?.updateMemo(memo, with: note)
