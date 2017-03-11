@@ -90,6 +90,7 @@ class MemoListViewController: MemoCollectionViewController {
     }
 
     NotificationCenter.default.addObserver(self, selector: #selector(updateMemoFromEvernote), name: SMNotification.SimpleMemoDidSetSimpleMemoNotebook, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(updateMemoFromEvernote), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
   }
 
   override func viewWillAppear(_ animated: Bool) {

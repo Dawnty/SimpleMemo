@@ -42,14 +42,9 @@ extension ENSession {
   func update(_ memo: Memo, noteRef: ENNoteRef, created: Date?, updated: Date?) {
     download(noteRef, progress: nil) { (note, error) in
       if let note = note {
-        memo.noteRef = noteRef
-        memo.guid = noteRef.guid
-        memo.isUpload = true
-        let enmlContent = note.enmlContent()
-        memo.text = enmlContent?.stringFromHTML
-        memo.createDate = created
-        memo.updateDate = updated
-        CoreDataStack.default.saveContext()
+        self.updateMemo(memo, note: note, noteRef: noteRef, created: created, updated: updated)
+      } else if let error = error {
+        printLog(message: error.localizedDescription)
       }
     }
 
@@ -59,13 +54,9 @@ extension ENSession {
     download(noteRef, progress: nil) { (note, error) in
       if let note = note {
         let memo = Memo.newMemo()
-        memo.noteRef = noteRef
-        memo.isUpload = true
-        let enmlContent = note.enmlContent()
-        memo.text = enmlContent?.stringFromHTML
-        memo.createDate = created
-        memo.updateDate = updated
-        CoreDataStack.default.saveContext()
+        self.updateMemo(memo, note: note, noteRef: noteRef, created: created, updated: updated)
+      } else if let error = error {
+        printLog(message: error.localizedDescription)
       }
     }
   }
@@ -107,6 +98,17 @@ extension ENSession {
         }
       }
     }
+  }
+
+  func updateMemo(_ memo: Memo, note: ENNote, noteRef: ENNoteRef, created: Date?, updated: Date?) {
+    memo.noteRef = noteRef
+    memo.guid = noteRef.guid
+    memo.isUpload = true
+    let enmlContent = note.enmlContent()
+    memo.text = enmlContent?.stringFromHTML
+    memo.createDate = created
+    memo.updateDate = updated
+    CoreDataStack.default.saveContext()
   }
 
   func updateMemo(_ memo: Memo, with note: EDAMNote) {
