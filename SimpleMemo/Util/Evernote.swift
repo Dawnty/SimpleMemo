@@ -57,12 +57,7 @@ extension ENSession {
     amnote.title = text.fetchTitle()
     amnote.notebookGuid = book.guid
     amnote.content = ENNoteContent(string: text).enml
-    var guid: String?
-    if memo.guid != nil {
-      guid = memo.guid
-    } else if memo.noteRef != nil {
-      guid = memo.noteRef?.guid
-    }
+    let guid = memo.guid ?? memo.noteRef?.guid
 
     if let guid = guid {
       amnote.guid = guid
@@ -116,12 +111,10 @@ private extension ENSession {
 
   func fetchSimpleMemoNoteBook(with guid: String) {
     guard let client = self.primaryNoteStore() else { return }
-    client.fetchNotebook(withGuid: guid, completion: { (book, error) in
+    client.fetchNotebook(withGuid: guid, completion: { [weak self] (book, error) in
       if let book = book {
-        let notebook = ENNotebook(notebook: book)
-        SimpleMemoNoteBook = notebook
-        SMStoreClient.saveSimpleMemoNoteBook(book: notebook)
-        printLog(message: "\(notebook)")
+        self?.setupSimpleMemoNotebook(with: book)
+        printLog(message: "\(book)")
       } else if let error = error {
         printLog(message: error.localizedDescription)
       }
@@ -132,31 +125,25 @@ private extension ENSession {
     guard let client = self.primaryNoteStore() else { return }
     let noteBook = EDAMNotebook()
     noteBook.name = bookName
-    client.create(noteBook) { (book, error) in
+    client.create(noteBook) { [weak self] (book, error) in
       if let book = book {
-        let notebook = ENNotebook(notebook: book)
-        SimpleMemoNoteBook = notebook
-        SMStoreClient.saveSimpleMemoNoteBook(book: notebook)
-        SMStoreClient.saveSimpleMemoNoteBookGuid(with: book.guid)
-        printLog(message: "\(notebook)")
+        self?.setupSimpleMemoNotebook(with: book)
+        printLog(message: "\(book)")
       } else if let error = error {
         printLog(message: error.localizedDescription)
-        self.findSimpleMemoNoteBook()
+        self?.findSimpleMemoNoteBook()
       }
     }
   }
 
   func findSimpleMemoNoteBook() {
     guard let client = self.primaryNoteStore() else { return }
-    client.listNotebooks { (books, error) in
+    client.listNotebooks { [weak self] (books, error) in
       if let books = books {
         for book in books {
           if book.name == bookName {
-            let notebook = ENNotebook(notebook: book)
-            SimpleMemoNoteBook = notebook
-            SMStoreClient.saveSimpleMemoNoteBook(book: notebook)
-            SMStoreClient.saveSimpleMemoNoteBookGuid(with: book.guid)
-            printLog(message: "\(notebook)")
+            self?.setupSimpleMemoNotebook(with: book)
+            printLog(message: "\(book)")
             break
           }
         }
@@ -164,6 +151,13 @@ private extension ENSession {
         printLog(message: error.localizedDescription)
       }
     }
+  }
+
+  func setupSimpleMemoNotebook(with book: EDAMNotebook) {
+    let notebook = ENNotebook(notebook: book)
+    SimpleMemoNoteBook = notebook
+    SMStoreClient.saveSimpleMemoNoteBook(book: notebook)
+    SMStoreClient.saveSimpleMemoNoteBookGuid(with: book.guid)
   }
 
 }
