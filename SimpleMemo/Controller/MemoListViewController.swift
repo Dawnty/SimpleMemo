@@ -380,7 +380,7 @@ private extension MemoListViewController {
         continue
       }
 
-      if memo.updateDate != result.created {
+      if memo.updateDate != result.updated {
         ENSession.shared.update(memo, noteRef: result.noteRef!, created: result.created, updated: result.updated)
       }
     }
