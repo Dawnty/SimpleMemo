@@ -15,6 +15,7 @@ public class Memo: NSManagedObject {
 
   @NSManaged public var text: String?
   @NSManaged public var noteRef: ENNoteRef?
+  @NSManaged public var guid: String?
   @NSManaged public var isUpload: Bool
   @NSManaged public var createDate: Date?
   @NSManaged public var updateDate: Date?

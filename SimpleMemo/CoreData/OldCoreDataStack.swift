@@ -7,6 +7,7 @@
 //
 
 import CoreData
+import SMKit
 
 class OldCoreDataStack: NSObject {
 
