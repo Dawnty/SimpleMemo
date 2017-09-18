@@ -13,6 +13,6 @@ public func printLog(message: String = "",
                      method: String = #function,
                      line: Int = #line) {
   #if DEBUG
-    print("\(Date()) \((file as NSString).lastPathComponent)[\(line)L], \(method): \(message)")
+    print("<DebugLog>: \(Date()) \((file as NSString).lastPathComponent)[\(line)L], \(method): \(message)")
   #endif
 }
